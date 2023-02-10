@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
   res.json({ status: "OK" });
 });
 
-app.post("/attendance", (req, res) => {
+app.get("/attendance", (req, res) => {
   res.json({ status: "OK" });
 });
 
