@@ -20,6 +20,10 @@ app.get("/", (req, res) => {
 });
 
 app.post("/attendance", (req, res) => {
+  res.json({ status: "OK" });
+});
+
+app.post("/attendance", (req, res) => {
   let sid = req.body.id || undefined;
   let id = req.query.id;
   let campus = req.query.campus;
