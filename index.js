@@ -1,5 +1,6 @@
 import axios from "axios";
-import express, { json, response } from "express";
+import express from "express";
+import cors from "cors";
 import BodyParser from "body-parser";
 import {
   checkSession,
