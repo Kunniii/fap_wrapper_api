@@ -2,33 +2,60 @@ import { parse } from "node-html-parser";
 import HtmlTableToJson from "html-table-to-json";
 import axios from "axios";
 
+const clog = console.log;
+
+const baseUrl = "https://fap.fpt.edu.vn/Report/ViewAttendstudent.aspx";
+const headers = {
+  "authority": "fap.fpt.edu.vn",
+  "accept-language": "en-GB,en;q=0.5",
+  "cache-control": "max-age=0",
+  "referer": "https://fap.fpt.edu.vn/Student.aspx",
+  "sec-fetch-dest": "document",
+  "sec-fetch-mode": "navigate",
+  "sec-fetch-site": "same-origin",
+  "sec-fetch-user": "?1",
+  "sec-gpc": "1",
+  "upgrade-insecure-requests": "1",
+  "user-agent": "CodeChoVui.dev",
+};
+
 export async function makeRequest(sid, params) {
-  const baseUrl = "https://fap.fpt.edu.vn/Report/ViewAttendstudent.aspx";
-  const headers = {
-    "authority": "fap.fpt.edu.vn",
-    "accept-language": "en-GB,en;q=0.5",
-    "cache-control": "max-age=0",
-    "cookie": `ASP.NET_SessionId=${sid}; G_AUTHUSER_H=1; G_ENABLED_IDPS=google`,
-    "referer": "https://fap.fpt.edu.vn/Student.aspx",
-    "sec-fetch-dest": "document",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-site": "same-origin",
-    "sec-fetch-user": "?1",
-    "sec-gpc": "1",
-    "upgrade-insecure-requests": "1",
-    "user-agent": "CodeChoVui.dev",
-  };
-  if (!params) {
-    return axios.get(baseUrl, {
-      headers,
-    });
-  } else {
-    return axios.get(baseUrl, {
-      headers,
-      params,
-    });
-  }
+  return axios.get(baseUrl, {
+    headers: {
+      ...headers,
+      cookie: `ASP.NET_SessionId=${sid}; G_AUTHUSER_H=1; G_ENABLED_IDPS=google`,
+    },
+    params,
+  });
 }
+
+export async function massRequest(sid, courses) {
+  let pages = [];
+
+  for (let c of courses) {
+    if (c.url == "None") continue;
+    pages.push({ name: c.name, url: c.url, params: c.requestParams });
+  }
+
+  return axios.all(pages.map((page) => makeRequest(sid, page.params))).then(
+    axios.spread((...responses) => {
+      return responses;
+    })
+  );
+}
+
+export function massJsonify(responses) {
+  let reports = [];
+  for (let res of responses) {
+    let data = jsonifyHTMLData(res.data);
+    let name = data.courses.current;
+    let report = data.currentCourseReport;
+    reports.push({ name, reports: report });
+  }
+  return reports;
+}
+
+//#region
 
 export function all(arr) {
   for (let i of arr) {
@@ -106,7 +133,7 @@ function extractDataFromCoursesHTML(html) {
   let coursesData = [];
   let doc = parse(html);
   let rows = doc.getElementsByTagName("tr");
-  let courseName, url, selected, current, requestParams, queryString;
+  let courseName, url, current, requestParams, queryString;
   for (let row of rows) {
     for (let child of row.childNodes) {
       if (child.rawTagName) {
@@ -116,13 +143,11 @@ function extractDataFromCoursesHTML(html) {
             .getElementsByTagName("b")[0]
             .text.replace(/\)\(.*\)/g, ")");
           url = "None";
-          selected = true;
           current = courseName;
         } else {
           let href = child.getElementsByTagName("a")[0].getAttribute("href");
           courseName = child.getElementsByTagName("a")[0].text;
           url = "https://fap.fpt.edu.vn/Report/ViewAttendstudent.aspx" + href;
-          selected = false;
           requestParams = getParamsFromHref(href);
           queryString = href;
         }
@@ -131,7 +156,6 @@ function extractDataFromCoursesHTML(html) {
     coursesData.push({
       name: courseName,
       url,
-      selected,
       requestParams,
       queryString,
     });
@@ -177,3 +201,4 @@ function extractDataFromTermsHTML(html) {
   }
   return { current, terms: termsData };
 }
+//#endregion

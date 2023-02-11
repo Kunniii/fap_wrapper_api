@@ -1,4 +1,3 @@
-import axios from "axios";
 import express from "express";
 import cors from "cors";
 import BodyParser from "body-parser";
@@ -8,6 +7,8 @@ import {
   makeRequest,
   all,
   any,
+  massRequest,
+  massJsonify,
 } from "./utils.js";
 
 const clog = console.log;
@@ -30,31 +31,60 @@ app.post("/attendance", (req, res) => {
   let id = req.query.id;
   let campus = req.query.campus;
   let term = req.query.term;
-  let course = req.query.course;
+
+  //--- If not provide a sid, send 400
   if (!sid) {
-    res.status(400).json({ status: "NEED SESSION ID" });
-  } else {
-    if (!all([id, campus, term, course])) {
-      if (!any([id, campus, term, course])) {
-        makeRequest(sid, null).then((response) => {
-          if (checkSession(response.data)) {
-            res.json({ status: "OK", data: jsonifyHTMLData(response.data) });
-          } else {
-            res.status(400).json({ status: "LOGGED OUT" });
-          }
-        });
-      } else {
-        res.status(400).json({ status: "NEED MORE PARAMS" });
-      }
+    res.status(400).json({
+      status: "NEED SESSION ID",
+      message: "At least provide a SessionID. It is required!",
+    });
+  }
+
+  //--- !all means not all [items] has value
+  if (!all([id, campus, term])) {
+    if (any([id, campus, term])) {
+      res.json({
+        status: "QUERY STRING MISSING",
+        message:
+          "All 3 params [id, campus, term] must set or DO NOT include query string.",
+      });
     } else {
-      makeRequest(sid, { id, campus, term, course }).then((response) => {
+      makeRequest(sid, null).then((response) => {
         if (checkSession(response.data)) {
-          res.json({ status: "OK", data: jsonifyHTMLData(response.data) });
+          let defaultData = jsonifyHTMLData(response.data);
+          massRequest(sid, defaultData.courses.courses).then((responses) => {
+            res.json({
+              status: "OK",
+              data: massJsonify([response, ...responses]),
+            });
+          });
         } else {
-          res.status(400).json({ status: "LOGGED OUT" });
+          res.status(400).json({
+            status: "LOGGED OUT",
+            message: "Please go to FAP and login then try again!",
+          });
         }
       });
     }
+  }
+  //--- If all [items] has value
+  if (all([id, campus, term])) {
+    makeRequest(sid, { id, campus, term }).then((response) => {
+      if (checkSession(response.data)) {
+        let defaultData = jsonifyHTMLData(response.data);
+        massRequest(sid, defaultData.courses.courses).then((responses) => {
+          res.json({
+            status: "OK",
+            data: massJsonify([response, ...responses]),
+          });
+        });
+      } else {
+        res.status(400).json({
+          status: "LOGGED OUT",
+          message: "Please go to FAP and login then try again!",
+        });
+      }
+    });
   }
 });
 
