@@ -46,13 +46,15 @@ export async function massRequest(sid, courses) {
 
 export function massJsonify(responses) {
   let reports = [];
+  let terms = {};
   for (let res of responses) {
     let data = jsonifyHTMLData(res.data);
+    terms["current"] = data.terms.current;
     let name = data.courses.current;
     let report = data.currentCourseReport;
     reports.push({ name, reports: report });
   }
-  return reports;
+  return { terms, reports };
 }
 
 //#region
