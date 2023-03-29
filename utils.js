@@ -50,6 +50,7 @@ export function massJsonify(responses) {
   for (let res of responses) {
     let data = jsonifyHTMLData(res.data);
     terms["current"] = data.terms.current;
+    terms["terms"] = data.terms.terms;
     let name = data.courses.current;
     let report = data.currentCourseReport;
     reports.push({ name, reports: report });
@@ -171,7 +172,7 @@ function extractDataFromCoursesHTML(html) {
 }
 
 function extractDataFromTermsHTML(html) {
-  let termsData = [];
+  let termsData = {};
   let doc = parse(html);
   // extract terms data
   let rows = doc.getElementsByTagName("tr");
@@ -198,13 +199,13 @@ function extractDataFromTermsHTML(html) {
         }
       }
     }
-    termsData.push({
+    termsData[termName] = {
       name: termName,
       url,
       selected,
       requestParams,
       queryString,
-    });
+    };
   }
   return { current, terms: termsData };
 }
