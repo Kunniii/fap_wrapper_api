@@ -103,12 +103,6 @@ export function jsonifyHTMLData(html) {
       return theCopy;
     });
 
-    // clog({
-    //   terms: termsData,
-    //   courses: coursesData,
-    //   currentCourseReport: reportsData,
-    // });
-
     return {
       terms: termsData,
       courses: coursesData,
