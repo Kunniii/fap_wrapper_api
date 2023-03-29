@@ -96,6 +96,19 @@ export function jsonifyHTMLData(html) {
     let coursesData = extractDataFromCoursesHTML(coursesHTML);
     let reportsData = extractDataFromReportsHTML(reportsHTML);
 
+    // Try to fix the bad typo that FU has in FAP :) when it's fixed, please tell me
+
+    reportsData.map((data) => {
+      let theCopy = { "Attendance status": data["Attedance status"], ...data };
+      return theCopy;
+    });
+
+    // clog({
+    //   terms: termsData,
+    //   courses: coursesData,
+    //   currentCourseReport: reportsData,
+    // });
+
     return {
       terms: termsData,
       courses: coursesData,
@@ -141,9 +154,7 @@ function extractDataFromCoursesHTML(html) {
       if (child.rawTagName) {
         let el = child.childNodes[0];
         if (el.rawTagName == "b") {
-          courseName = child
-            .getElementsByTagName("b")[0]
-            .text.replace(/\)\(.*\)/g, ")");
+          courseName = child.getElementsByTagName("b")[0].text.replace(/\)\(.*\)/g, ")");
           url = "None";
           current = courseName;
         } else {

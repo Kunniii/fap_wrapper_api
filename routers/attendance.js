@@ -11,37 +11,26 @@ import {
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  res.json({ status: "OK" });
-});
-
-router.get("/:id", (req, res) => {
-  let sid = req.params.id;
-  if (!sid) {
-    res.json({
-      status: "NEED SESSION ID",
-      message:
-        'You\'re trying to make a GET request, that\'s OK. Provide your SessionID after the slash e.g: /your-id. But next time, please use POST and POST a json {"id":"your-id"} to /attendance endpoint. Thanks!',
-    });
-  } else {
+  let { id: sid } = req.query;
+  if (sid) {
     makeRequest(sid, null).then((response) => {
       if (checkSession(response.data)) {
         let defaultData = jsonifyHTMLData(response.data);
         massRequest(sid, defaultData.courses.courses).then((responses) => {
           res.json({
             status: "OK",
-            message:
-              'You\'re trying to make a GET request, that\'s OK. Provide your SessionID after the slash e.g: /your-id. But next time, please use POST and POST a json {"id":"your-id"} to /attendance endpoint. Thanks!',
             data: massJsonify([response, ...responses]),
           });
         });
       } else {
         res.status(400).json({
           status: "LOGGED OUT",
-          message:
-            'Please go to FAP and login then try again! You\'re trying to make a GET request, that\'s OK. Provide your SessionID after the slash e.g: /your-id. But next time, please use POST and POST a json {"id":"your-id"} to /attendance endpoint. Thanks!',
+          message: "Please go to FAP and login then try again!",
         });
       }
     });
+  } else {
+    res.json({ status: "OK" });
   }
 });
 
@@ -55,7 +44,7 @@ router.post("/", (req, res) => {
   if (!sid) {
     res.status(400).json({
       status: "NEED SESSION ID",
-      message: "At least provide a SessionID. It is required!",
+      message: "Please provide a SessionID. It is required!",
     });
   }
 
@@ -64,8 +53,7 @@ router.post("/", (req, res) => {
     if (any([id, campus, term])) {
       res.json({
         status: "QUERY STRING MISSING",
-        message:
-          "All 3 params [id, campus, term] must set or DO NOT include query string.",
+        message: "All 3 params [id, campus, term] must set or DO NOT include query string.",
       });
     } else {
       makeRequest(sid, null).then((response) => {
