@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import BodyParser from "body-parser";
 
-import { router as attendance } from "./routers/attendance.js"
-
+import { router as attendance } from "./routers/attendance.js";
+import { examSchedule } from "./routers/examSchedule.js";
 
 const clog = console.log;
 const app = express();
@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/attendance", attendance);
-
+app.use("/exam", examSchedule);
 
 app.listen(PORT, (e) => {
   if (e) {

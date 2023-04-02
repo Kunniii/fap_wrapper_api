@@ -7,7 +7,7 @@ import {
   any,
   massRequest,
   massJsonify,
-} from "../utils.js";
+} from "../utils/attendance.js";
 const router = express.Router();
 
 router.get("/", (req, res) => {
