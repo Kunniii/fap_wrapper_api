@@ -32,4 +32,28 @@ router.get("/", (req, res) => {
   }
 });
 
+router.post("/", (req, res) => {
+  let { id: sid, campus, term, group } = req.body;
+  // no need `term`, because it will use the current one
+  // same as `campus`
+  if (!(sid && group)) {
+    res.json({ status: "OK", message: "Needed `id`, `term` and `group`" });
+  } else {
+    makeRequest(baseUrl, sid, { campus, term, group }).then((r) => {
+      if (checkSession(r.data)) {
+        let data = jsonifyHTMLData(r.data);
+        res.json({
+          status: "OK",
+          data: data,
+        });
+      } else {
+        res.status(400).json({
+          status: "LOGGED OUT",
+          message: "Please go to FAP and login then try again!",
+        });
+      }
+    });
+  }
+});
+
 export { router as classSchedule };
