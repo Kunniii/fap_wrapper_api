@@ -41,22 +41,24 @@ router.get("/", (req, res) => {
 router.post("/", (req, res) => {
   let { id: sid, campus, term } = req.body;
 
-  //--- If not provide a sid, send 400
-  if (!sid) {
-    res.status(400).json({
-      status: "NEED SESSION ID",
-      message: "Please provide a SessionID. It is required!",
-    });
-  } else {
+  if (sid) {
     makeRequest(baseUrl, sid, { campus, term }).then((response) => {
       if (checkSession(response.data)) {
         let defaultData = jsonifyHTMLData(response.data);
-        massRequest(sid, defaultData.courses.courses).then((responses) => {
-          res.json({
-            status: "OK",
-            data: massJsonify([response, ...responses]),
-          });
-        });
+        try {
+          massRequest(baseUrl, sid, defaultData.courses.courses)
+            .then((responses) => {
+              res.json({
+                status: "OK",
+                data: massJsonify([response, ...responses]),
+              });
+            })
+            .catch((e) => {
+              res.status(400).json({ status: "FuckAP", message: e.message });
+            });
+        } catch (e) {
+          res.status(400).json({ status: "FuckAP", message: e.message });
+        }
       } else {
         res.status(400).json({
           status: "LOGGED OUT",
@@ -64,6 +66,8 @@ router.post("/", (req, res) => {
         });
       }
     });
+  } else {
+    res.json({ status: "OK" });
   }
 });
 
