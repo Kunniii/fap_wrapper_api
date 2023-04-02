@@ -1,5 +1,4 @@
 import express from "express";
-import axios from "axios";
 import { jsonifyHTMLData } from "../utils/examSchedule.js";
 import { checkSession, makeRequest } from "../utils/index.js";
 const router = express.Router();

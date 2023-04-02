@@ -67,4 +67,4 @@ router.post("/", (req, res) => {
   }
 });
 
-export { router };
+export { router as attendance };
