@@ -1,27 +1,31 @@
 import express from "express";
-import {
-  checkSession,
-  jsonifyHTMLData,
-  makeRequest,
-  all,
-  any,
-  massRequest,
-  massJsonify,
-} from "../utils/attendance.js";
+import { jsonifyHTMLData, massRequest, massJsonify } from "../utils/attendance.js";
+
+import { makeRequest, checkSession } from "../utils/index.js";
 const router = express.Router();
+
+const baseUrl = "https://fap.fpt.edu.vn/Report/ViewAttendstudent.aspx";
 
 router.get("/", (req, res) => {
   let { id: sid, campus, term } = req.query;
   if (sid) {
-    makeRequest(sid, { campus, term }).then((response) => {
+    makeRequest(baseUrl, sid, { campus, term }).then((response) => {
       if (checkSession(response.data)) {
         let defaultData = jsonifyHTMLData(response.data);
-        massRequest(sid, defaultData.courses.courses).then((responses) => {
-          res.json({
-            status: "OK",
-            data: massJsonify([response, ...responses]),
-          });
-        });
+        try {
+          massRequest(baseUrl, sid, defaultData.courses.courses)
+            .then((responses) => {
+              res.json({
+                status: "OK",
+                data: massJsonify([response, ...responses]),
+              });
+            })
+            .catch((e) => {
+              res.status(400).json({ status: "FuckAP", message: e.message });
+            });
+        } catch (e) {
+          res.status(400).json({ status: "FuckAP", message: e.message });
+        }
       } else {
         res.status(400).json({
           status: "LOGGED OUT",
@@ -44,7 +48,7 @@ router.post("/", (req, res) => {
       message: "Please provide a SessionID. It is required!",
     });
   } else {
-    makeRequest(sid, { campus, term }).then((response) => {
+    makeRequest(baseUrl, sid, { campus, term }).then((response) => {
       if (checkSession(response.data)) {
         let defaultData = jsonifyHTMLData(response.data);
         massRequest(sid, defaultData.courses.courses).then((responses) => {

@@ -1,15 +1,16 @@
 import express from "express";
 import axios from "axios";
-import { checkSession, jsonifyHTMLData, makeRequest } from "../utils/examSchedule.js";
+import { jsonifyHTMLData } from "../utils/examSchedule.js";
+import { checkSession, makeRequest } from "../utils/index.js";
 const router = express.Router();
-
+const baseUrl = "https://fap.fpt.edu.vn/Exam/ScheduleExams.aspx";
 router.get("/", (req, res) => {
   let { id: sid } = req.query;
   if (!sid) {
     res.json({ status: "OK" });
   }
 
-  makeRequest(sid).then((r) => {
+  makeRequest(baseUrl, sid).then((r) => {
     if (checkSession(r.data)) {
       let data = jsonifyHTMLData(r.data);
       if (data) {
