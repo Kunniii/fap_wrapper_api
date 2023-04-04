@@ -17,7 +17,7 @@ router.get("/", (req, res) => {
             .then((responses) => {
               res.json({
                 status: "OK",
-                data: massJsonify([response, ...responses]),
+                data: [...massJsonify([response, ...responses])],
               });
             })
             .catch((e) => {

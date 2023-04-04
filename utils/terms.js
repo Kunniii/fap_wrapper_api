@@ -8,20 +8,20 @@ export function jsonifyHTMLData(html) {
   let table = theDivHasData.find("table");
   let body = table.find("tbody");
   let trs = body.find("tr");
-  let selected = "";
-  let data = {};
+  let current = "";
+  let data = [];
   for (let tr of trs) {
     let td = tr.firstChild;
     let tag = td.firstChild.name;
     let name = "";
     if (tag == "b") {
-      selected = $(td.firstChild).text();
+      current = $(td.firstChild).text();
     } else {
       name = $(td.firstChild).text();
       let params = getParamsFromHref(td.firstChild.attributes[0].value);
-      data[name] = params;
+      data.push({ name: name, ...params });
     }
   }
-  data.selected = selected;
+  data.current = current;
   return data;
 }

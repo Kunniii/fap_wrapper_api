@@ -31,7 +31,7 @@ export function massJsonify(responses) {
     let report = data.currentCourseReport;
     reports.push({ name, reports: report });
   }
-  return { terms, reports };
+  return reports;
 }
 
 //#region
