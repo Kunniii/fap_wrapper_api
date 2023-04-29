@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  fapapi:
+    build: .
+    ports:
+      - 9090:9090

@@ -12,7 +12,7 @@ group=SE1601
 
 router.get("/", (req, res) => {
   let { id: sid, campus, term, group } = req.query;
-  if (!(sid && term && group)) {
+  if (!(sid && group)) {
     res.json({ status: "OK", message: "Needed `id`, `term` and `group`" });
   } else {
     makeRequest(baseUrl, sid, { campus, term, group }).then((r) => {
