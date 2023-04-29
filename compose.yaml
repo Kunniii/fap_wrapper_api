@@ -4,6 +4,8 @@ services:
   fapapi:
     build: .
     container_name: fap_api
+    volumes:
+      - ./logs:/app/logs/
     environment:
       - PORT=80
     ports:
