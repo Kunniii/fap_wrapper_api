@@ -6,6 +6,7 @@ COPY ./package.json .
 COPY ./yarn.lock .
 COPY ./routers/* ./routers/
 COPY ./utils/* ./utils/
+
 RUN yarn
 
 ENTRYPOINT yarn start

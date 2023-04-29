@@ -3,5 +3,8 @@ version: "3"
 services:
   fapapi:
     build: .
+    container_name: fap_api
+    environment:
+      - PORT=80
     ports:
-      - 9090:9090
+      - 9090:80

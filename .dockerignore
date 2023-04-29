@@ -2,3 +2,4 @@
 test*
 *.log
 .vscode
+logs
